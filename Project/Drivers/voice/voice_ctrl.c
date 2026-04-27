@@ -40,7 +40,8 @@ static uint32_t     s_play_start  = 0U;   /* 开始播报的系统 tick */
  * --------------------------------------------------------------------- */
 static void send_cmd(uint8_t cmd, uint8_t param1, uint8_t param2)
 {
-    static uint8_t frame[8];
+    /* Local buffer — safe against re-entrant or back-to-back calls */
+    uint8_t frame[8];
     frame[0] = VOICE_FRAME_HEAD;
     frame[1] = 0xFFU;
     frame[2] = 0x06U;

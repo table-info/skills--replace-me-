@@ -15,7 +15,8 @@
  * --------------------------------------------------------------------- */
 static uint8_t s_rx_buf[DGUS_RX_BUF_SIZE];
 static uint8_t s_tx_buf[DGUS_TX_BUF_SIZE];
-static bool    s_rx_ready = false;  /* DMA 接收完成标志 */
+static bool    s_rx_ready  = false;  /* DMA 接收完成标志 */
+static bool    s_tx_busy   = false;  /* DMA 发送进行中标志，防止缓冲区覆盖 */
 
 /* -----------------------------------------------------------------------
  * 私有：构建写 VP 帧
@@ -89,7 +90,12 @@ void DiwinComm_Process(void)
 
 void DiwinComm_WriteVP(uint16_t vp, uint16_t value)
 {
+    /* Skip if a previous DMA transfer is still in progress */
+    if (s_tx_busy) {
+        return;
+    }
     uint8_t len = build_write_frame(s_tx_buf, vp, value);
+    s_tx_busy = true;
     HAL_UART_Transmit_DMA(&huart2, s_tx_buf, len);
 }
 
@@ -107,4 +113,13 @@ void DiwinComm_UpdateFaultCode(uint16_t fault_code)
 void DiwinComm_RxCpltCallback(void)
 {
     s_rx_ready = true;
+}
+
+/**
+ * @brief  USART2 DMA 发送完成回调（在 HAL_UART_TxCpltCallback 中调用）
+ *         清除忙标志，允许下一次 WriteVP
+ */
+void DiwinComm_TxCpltCallback(void)
+{
+    s_tx_busy = false;
 }

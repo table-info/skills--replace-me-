@@ -86,8 +86,12 @@ static void Task_EventDispatch(void)
     Event_t evt;
     EventQueue_t *q = EventQueue_GetGlobal();
 
-    while (EventQueue_Pop(q, &evt)) {
+    /* Bound iterations per task slot to prevent time-slice overrun */
+#define MAX_EVENTS_PER_DISPATCH  8U
+    uint8_t count = 0U;
+    while ((count < MAX_EVENTS_PER_DISPATCH) && EventQueue_Pop(q, &evt)) {
         SysState_HandleEvent(&evt);
+        count++;
     }
 
     /* 状态机周期轮询（处理超时/入口动作） */

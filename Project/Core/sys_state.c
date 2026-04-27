@@ -113,12 +113,16 @@ void SysState_HandleEvent(const Event_t *evt)
             break;
         case EVT_RFID_CARD_READ:
             /* 根据卡号选择电机 A 或 B（示例：奇数→A，偶数→B） */
-            if (evt->param & 0x01U) {
-                MotorBlade_Select(BLADE_MOTOR_A);
-                VoiceCtrl_Play(VOICE_ID_MOTOR_A);
-            } else {
-                MotorBlade_Select(BLADE_MOTOR_B);
-                VoiceCtrl_Play(VOICE_ID_MOTOR_B);
+            {
+                BladeMotorId_t target = (evt->param & 0x01U)
+                                        ? BLADE_MOTOR_A : BLADE_MOTOR_B;
+                if (MotorBlade_Select(target)) {
+                    VoiceCtrl_Play((target == BLADE_MOTOR_A)
+                                   ? VOICE_ID_MOTOR_A : VOICE_ID_MOTOR_B);
+                } else {
+                    /* 另一台电机仍在运行，无法切换 */
+                    VoiceCtrl_Play(VOICE_ID_CARD_FAIL);
+                }
             }
             break;
         case EVT_RFID_CARD_INVALID:

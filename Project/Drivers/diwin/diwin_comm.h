@@ -80,4 +80,9 @@ void DiwinComm_UpdateFaultCode(uint16_t fault_code);
  */
 void DiwinComm_RxCpltCallback(void);
 
+/**
+ * @brief  USART2 DMA 发送完成回调（在 HAL_UART_TxCpltCallback 中调用）
+ */
+void DiwinComm_TxCpltCallback(void);
+
 #endif /* DIWIN_COMM_H */

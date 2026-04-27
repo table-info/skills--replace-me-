@@ -79,11 +79,6 @@ static void rc522_set_bit(uint8_t reg, uint8_t mask)
     rc522_write(reg, rc522_read(reg) | mask);
 }
 
-static void rc522_clear_bit(uint8_t reg, uint8_t mask)
-{
-    rc522_write(reg, rc522_read(reg) & ~mask);
-}
-
 /* -----------------------------------------------------------------------
  * 私有：RC522 天线使能
  * --------------------------------------------------------------------- */
